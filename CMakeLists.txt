@@ -99,8 +99,13 @@ configure_file(
 find_package(CUDA)
 
 set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}  -O3")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -fpermissive -fopenmp -std=c++11")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O3 -fpermissive -fopenmp -std=c++11 -DDEBUG_FITS")
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -fpermissive -Xpreprocessor -fopenmp -lomp -I\"$(brew --prefix libomp)/include\" -L\"$(brew --prefix libomp)/lib\" -std=c++11")
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O3 -fpermissive -Xpreprocessor -fopenmp -lomp -I\"$(brew --prefix libomp)/include\" -L\"$(brew --prefix libomp)/lib\" -std=c++11 -DDEBUG_FITS")
+else()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -fpermissive -fopenmp -std=c++11")
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O3 -fpermissive -fopenmp -std=c++11 -DDEBUG_FITS")
+endif()
 
 if(${CUDA_FOUND})
     message("Compiling CUDA accelerated reconstruction code, with 3D support")

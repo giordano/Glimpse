@@ -45,6 +45,13 @@ matrix:
             - llvm
             - libomp
             - *macos_packages
+    - os: osx
+      osx_image: xcode10.1
+      addons:
+        homebrew:
+          packages:
+            - libomp
+            - *macos_packages
 
 cache:
     directories:
