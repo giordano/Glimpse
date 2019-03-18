@@ -17,25 +17,28 @@ addons:
       - pkgconfig
       - gsl
       - fftw
-      - brewsci/science/ccfits
       - cfitsio
       - brewsci/science/nfft
       - armadillo
-      - boost
 
 matrix:
   include:
     - os: linux
+      name: "GNU/Linux with GCC"
     - os: osx
+      name: "macOS with GCC"
       osx_image: xcode10.1
       env:
-        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+        - MATRIX_EVAL=".ci/install_boost.sh && brew install brewsci/science/ccfits --cc=gcc-7 && CC=gcc-7 && CXX=g++-7"
       addons:
         homebrew:
           packages:
             - gcc@7
+            - modules
+            - lmod
             - *macos_packages
     - os: osx
+      name: "macOS with vanilla Clang"
       osx_image: xcode10.1
       env:
         - MATRIX_EVAL="CC=/usr/local/opt/llvm/bin/clang && CXX=/usr/local/opt/llvm/bin/clang++"
@@ -44,6 +47,8 @@ matrix:
           packages:
             - llvm
             - libomp
+            - boost
+            - brewsci/science/ccfits
             - *macos_packages
 
 cache:
@@ -52,6 +57,7 @@ cache:
       - /home/travis/build/CosmoStat/Glimpse/build/NICAEA
 
 before_install:
+  - while sleep 540 ; do echo "========== Just telling Travis we're alive =========="; done &
   - eval "${MATRIX_EVAL}"
 
 install: true
