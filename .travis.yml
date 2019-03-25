@@ -15,6 +15,7 @@ addons:
     packages: &macos_packages
       - cmake
       - pkgconfig
+      - libomp
       - gsl
       - fftw
       - brewsci/science/ccfits
@@ -26,16 +27,16 @@ addons:
 matrix:
   include:
     - os: linux
+      name: "GNU/Linux with GCC"
     - os: osx
+      name: "macOS with AppleClang"
       osx_image: xcode10.1
-      env:
-        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
       addons:
         homebrew:
           packages:
-            - gcc@7
             - *macos_packages
     - os: osx
+      name: "macOS with vanilla Clang"
       osx_image: xcode10.1
       env:
         - MATRIX_EVAL="CC=/usr/local/opt/llvm/bin/clang && CXX=/usr/local/opt/llvm/bin/clang++"
@@ -43,7 +44,6 @@ matrix:
         homebrew:
           packages:
             - llvm
-            - libomp
             - *macos_packages
 
 cache:
