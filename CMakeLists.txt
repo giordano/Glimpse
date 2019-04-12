@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 
 # Paths to external libraries
-set(NICAEA_URL https://github.com/EiffL/nicaea)
+set(NICAEA_URL https://github.com/UCL/nicaea)
 set(SPARSE2D_URL https://github.com/CosmoStat/Sparse2D.git)
 
 # Adding customized cmake module
@@ -41,7 +41,7 @@ find_package(Boost     COMPONENTS program_options REQUIRED)
 ExternalProject_Add(NICAEA
         PREFIX NICAEA
         GIT_REPOSITORY ${NICAEA_URL}
-	GIT_TAG f7850e5009d0341226d4c1f38b116f316d8a0516)
+	GIT_TAG d813b133a3aadab8f234ecfb9d7e7146618a2cb3)
         set(NICAEA_LIBRARY_DIR ${CMAKE_BINARY_DIR}/NICAEA/src/NICAEA/lib)
         set(NICAEA_INCLUDE_DIR ${CMAKE_BINARY_DIR}/NICAEA/src/NICAEA/include)
         set(NICAEA_LIBRARIES -lnicaea)
