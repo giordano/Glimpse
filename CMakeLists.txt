@@ -112,7 +112,7 @@ if(${CUDA_FOUND})
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCUDA_ACC")
     set(CUDA_NVCC_FLAGS
     ${CUDA_NVCC_FLAGS};
-    -O3 -gencode arch=compute_52,code=sm_52 -gencode arch=compute_61,code=sm_61 -gencode arch=compute_20,code=sm_20
+    -O3 -gencode arch=compute_52,code=sm_52 -gencode arch=compute_61,code=sm_61
     )
 
     cuda_add_executable(glimpse src/glimpse.cpp ${GLIMPSE_SRC} src/spg.cu src/spg.cpp)
