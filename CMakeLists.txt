@@ -133,3 +133,19 @@ target_link_libraries(glimpse ${NICAEA_LIBRARIES}
                               ${CCFITS_LIBRARY}
                               ${CFITSIO_LIBRARY}
                               ${ARMADILLO_LIBRARIES})
+
+# Testing
+enable_testing()
+
+add_executable(test_wavelet_transform test/test_wavelet_transform.cpp
+									  src/wavelet_transform.cpp
+									  src/starlet_2d.cpp)
+target_include_directories(test_wavelet_transform PRIVATE /usr/local/include)
+target_compile_options(test_wavelet_transform PRIVATE -std=c++11)
+target_link_libraries(test_wavelet_transform ${SPARSE2D_LIBRARIES}
+											 ${FFTW_LIBRARIES}
+											 ${CCFITS_LIBRARY}
+											 ${CFITSIO_LIBRARY})
+add_dependencies(test_wavelet_transform SPARSE2D)
+
+add_test( test_wavelet_transform_test test_wavelet_transform )
