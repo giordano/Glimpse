@@ -149,3 +149,12 @@ target_link_libraries(test_wavelet_transform ${SPARSE2D_LIBRARIES}
 add_dependencies(test_wavelet_transform SPARSE2D)
 
 add_test( test_wavelet_transform_test test_wavelet_transform )
+
+
+add_executable(test_field test/test_field.cpp)
+target_include_directories(test_field PRIVATE /usr/local/include)
+target_compile_options(test_field PRIVATE -std=c++11)
+target_link_libraries(test_field ${Boost_LIBRARIES})
+add_dependencies(test_wavelet_transform NICAEA)
+
+add_test( test_field_test test_field )
