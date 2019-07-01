@@ -22,9 +22,9 @@ void coord_test(int npix, int i, int j, double ra_array[], double de_array[], do
 class mock_survey : public survey {
 
 	public :
-//	mock_survey() : survey(new boost::property_tree::ptree()) {
-//
-//	}
+	mock_survey(boost::property_tree::ptree pt) : survey(pt) {
+
+	}
 	void load(std::string fileName) {
 		// does nothing
 	}
@@ -97,8 +97,8 @@ int npix = (int) 0.001/0.1 + 0.5;
 
 field *set_up( ) {
 	auto pt = new boost::property_tree::ptree();
-	boost::property_tree::ini_parser::read_ini(ini, pt);
-	field *ff = new field(*pt, (survey*) new mock_survey());
+	boost::property_tree::ini_parser::read_ini(ini, *pt);
+	field *ff = new field(*pt, new mock_survey(*pt));
 
 	return ff;
 }
