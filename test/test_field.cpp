@@ -103,6 +103,13 @@ field *set_up( ) {
 	return ff;
 }
 
+TEST_CASE( "Test field creation with a mock survey", "[field]") {
+	field *ff = 0;
+	ff = set_up();
+
+	REQUIRE(ff != 0);
+}
+
 TEST_CASE( "Test pixel coordinates for the mock field", "[field]") {
 	field *ff = set_up();
 
