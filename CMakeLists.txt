@@ -151,26 +151,27 @@ add_dependencies(test_wavelet_transform SPARSE2D)
 add_test( test_wavelet_transform_test test_wavelet_transform )
 
 
-#add_executable(test_field test/test_field.cpp
-#						  src/survey.cpp
-#						  src/redshift_distribution.cpp
-#						  src/field.cpp
-##						  src/surface_reconstruction.cpp
-##						  src/density_reconstruction.cpp
-#						  src/starlet_2d.cpp
-#						  src/wavelet_transform.cpp
-#						  )
-#target_include_directories(test_field PRIVATE /usr/local/include)
-#target_compile_options(test_field PRIVATE -std=c++11)
-#target_link_libraries(test_field ${NICAEA_LIBRARIES}
-#                             	 ${Boost_LIBRARIES}
-#                              	 ${GSL_LIBRARIES}
-#                          	     ${NFFT_LIBRARIES}
-#                             	 ${FFTW_LIBRARIES}
-#                             	 ${CCFITS_LIBRARY}
-#                             	 ${CFITSIO_LIBRARY}
-#                             	 ${ARMADILLO_LIBRARIES})
-#add_dependencies(test_field NICAEA
-#							SPARSE2D)
-#
-#add_test( test_field_test test_field )
+add_executable(test_field test/test_field.cpp
+						  src/survey.cpp
+						  src/redshift_distribution.cpp
+						  src/field.cpp
+#						  src/surface_reconstruction.cpp
+#						  src/density_reconstruction.cpp
+						  src/starlet_2d.cpp
+						  src/wavelet_transform.cpp
+						  )
+target_include_directories(test_field PRIVATE /usr/local/include)
+target_compile_options(test_field PRIVATE -std=c++11 -g)
+target_link_libraries(test_field ${NICAEA_LIBRARIES}
+                                 ${SPARSE2D_LIBRARIES}
+                             	 ${Boost_LIBRARIES}
+                              	 ${GSL_LIBRARIES}
+                          	     ${NFFT_LIBRARIES}
+                             	 ${FFTW_LIBRARIES}
+                             	 ${CCFITS_LIBRARY}
+                             	 ${CFITSIO_LIBRARY}
+                             	 ${ARMADILLO_LIBRARIES})
+add_dependencies(test_field NICAEA
+							SPARSE2D)
+
+add_test( test_field_test test_field )
