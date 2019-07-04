@@ -36,7 +36,7 @@
 #define BOOST_TEST_MODULE "redshift_distribution_module"
 #include <boost/test/unit_test.hpp>
 
-#include "redshift_distribution.h"
+#include "../src/redshift_distribution.h"
 
 BOOST_AUTO_TEST_CASE( integration )
 {
