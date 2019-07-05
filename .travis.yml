@@ -58,7 +58,11 @@ install: true
 
 # Build steps
 script:
-    - mkdir -p build && cd build
-    - cmake ..
-    - make
-    - ./glimpse --version
+  - |
+    if [ "${CC}" = "/usr/local/opt/llvm/bin/clang" ]; then
+      export CXXFLAGS="-L$(brew --prefix libomp)/lib"
+    fi
+  - mkdir -p build && cd build
+  - cmake ..
+  - make
+  - ./glimpse --version
