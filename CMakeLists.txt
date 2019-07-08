@@ -41,7 +41,8 @@ find_package(Boost     COMPONENTS program_options REQUIRED)
 ExternalProject_Add(NICAEA
         PREFIX NICAEA
         GIT_REPOSITORY ${NICAEA_URL}
-	GIT_TAG d813b133a3aadab8f234ecfb9d7e7146618a2cb3)
+        GIT_TAG d813b133a3aadab8f234ecfb9d7e7146618a2cb3
+        CMAKE_CACHE_ARGS "-DFFTW_ROOT:FILEPATH=${FFTW_ROOT}")
         set(NICAEA_LIBRARY_DIR ${CMAKE_BINARY_DIR}/NICAEA/src/NICAEA/lib)
         set(NICAEA_INCLUDE_DIR ${CMAKE_BINARY_DIR}/NICAEA/src/NICAEA/include)
         set(NICAEA_LIBRARIES -lnicaea)
