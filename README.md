@@ -80,7 +80,15 @@ An example of *config3d.ini* can be found in the *example* directory.
 
 Reconstructing a 3D field is very computationally demanding, and using a GPU is higly recommended to speed up the reconstruction. If an installation of CUDA can be
 detected on your system, CMake will automatically compile GPU specific code to
-replace the CPU implementation.
+replace the CPU implementation.  If you want to compile for specific CUDA
+compute capabilities, list them as a semicolon-separated list in the
+`CUDA_COMPUTE_CAPABILITIES` CMake variable.  E.g., to compile for
+compute capabilities 3.7, 5.2, and 6.1 use
+```
+cmake -DCUDA_COMPUTE_CAPABILITIES="37;52;61" ..
+```
+Check the compute capability of your device, for example at
+<https://en.wikipedia.org/wiki/CUDA>.
 
 Glimpse uses peer-to-peer memory transfer between GPUs on a multi-gpu system. You
 may choose at runtime which GPUs to use in your system by providing the -g option:

@@ -110,10 +110,10 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG_FITS")
 if(${CUDA_FOUND})
     message("Compiling CUDA accelerated reconstruction code, with 3D support")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCUDA_ACC")
-    set(CUDA_NVCC_FLAGS
-    ${CUDA_NVCC_FLAGS};
-    -O3 -gencode arch=compute_52,code=sm_52 -gencode arch=compute_61,code=sm_61
-    )
+    set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -O3")
+    foreach(CAPABILITY ${CUDA_COMPUTE_CAPABILITIES})
+      set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -gencode arch=compute_${CAPABILITY},code=sm_${CAPABILITY}")
+    endforeach()
 
     cuda_add_executable(glimpse src/glimpse.cpp ${GLIMPSE_SRC} src/spg.cu src/spg.cpp)
     cuda_add_cufft_to_target(glimpse)
