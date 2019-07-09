@@ -11,7 +11,6 @@ addons:
       - libnfft3-dev
       - libarmadillo-dev
       - libboost-all-dev
-      - catch
   homebrew:
     packages: &macos_packages
       - cmake
@@ -24,7 +23,6 @@ addons:
       - brewsci/science/nfft
       - armadillo
       - boost
-      - catch2
 
 matrix:
   include:
@@ -55,6 +53,16 @@ cache:
 
 before_install:
   - eval "${MATRIX_EVAL}"
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew update && brew install catch2; fi
+  - |
+    if [ "${TRAVIS_OS_NAME}" = "linux" ]; then
+      cd "$HOME"
+      git clone https://github.com/catchorg/Catch2.git
+      cd Catch2
+      cmake -Bbuild -H. -DBUILD_TESTING=OFF
+      sudo cmake --build build/ --target install
+      cd "$TRAVIS_BUILD_DIR"
+    fi
 
 install: true
 
@@ -68,3 +76,5 @@ script:
   - cmake -DBUILD_TESTING=ON ..
   - make VERBOSE=1
   - ./glimpse --version
+  - ./test_wavelet_transform
+  # - ./test_field
