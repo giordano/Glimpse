@@ -41,7 +41,8 @@ find_package(Boost     COMPONENTS program_options REQUIRED)
 ExternalProject_Add(NICAEA
         PREFIX NICAEA
         GIT_REPOSITORY ${NICAEA_URL}
-	GIT_TAG d813b133a3aadab8f234ecfb9d7e7146618a2cb3)
+        GIT_TAG d813b133a3aadab8f234ecfb9d7e7146618a2cb3
+        CMAKE_CACHE_ARGS "-DFFTW_ROOT:FILEPATH=${FFTW_ROOT}")
         set(NICAEA_LIBRARY_DIR ${CMAKE_BINARY_DIR}/NICAEA/src/NICAEA/lib)
         set(NICAEA_INCLUDE_DIR ${CMAKE_BINARY_DIR}/NICAEA/src/NICAEA/include)
         set(NICAEA_LIBRARIES -lnicaea)
@@ -98,14 +99,13 @@ configure_file(
 
 find_package(CUDA)
 
-set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}  -O3")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -fpermissive -Xpreprocessor -fopenmp -lomp -I/usr/local/include -L/usr/local/lib -std=c++11")
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fpermissive -Xpreprocessor -fopenmp -lomp -I/usr/local/include -L/usr/local/lib -std=c++11 -DDEBUG_FITS")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -fpermissive -Xpreprocessor -fopenmp -lomp -std=c++11")
 else()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -fpermissive -fopenmp -std=c++11")
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fpermissive -fopenmp -std=c++11 -DDEBUG_FITS")
 endif()
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG_FITS")
 
 if(${CUDA_FOUND})
     message("Compiling CUDA accelerated reconstruction code, with 3D support")

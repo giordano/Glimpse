@@ -32,14 +32,14 @@ matrix:
       name: "GNU/Linux with GCC"
     - os: osx
       name: "macOS with AppleClang"
-      osx_image: xcode10.1
+      osx_image: xcode10.2
       addons:
         homebrew:
           packages:
             - *macos_packages
     - os: osx
       name: "macOS with vanilla Clang"
-      osx_image: xcode10.1
+      osx_image: xcode10.2
       env:
         - MATRIX_EVAL="CC=/usr/local/opt/llvm/bin/clang && CXX=/usr/local/opt/llvm/bin/clang++"
       addons:
@@ -60,7 +60,11 @@ install: true
 
 # Build steps
 script:
-    - mkdir -p build && cd build
-    - cmake -DBUILD_TESTING=ON ..
-    - make
-    - ./glimpse --version
+  - |
+    if [ "${TRAVIS_OS_NAME}" = "osx" ]; then
+      export LDFLAGS="-L$(brew --prefix libomp)/lib"
+    fi
+  - mkdir -p build && cd build
+  - cmake -DBUILD_TESTING=ON ..
+  - make VERBOSE=1
+  - ./glimpse --version
