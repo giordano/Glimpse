@@ -11,6 +11,7 @@ addons:
       - libnfft3-dev
       - libarmadillo-dev
       - libboost-all-dev
+      - catch
   homebrew:
     packages: &macos_packages
       - cmake
@@ -23,6 +24,7 @@ addons:
       - brewsci/science/nfft
       - armadillo
       - boost
+      - catch2
 
 matrix:
   include:
@@ -59,6 +61,6 @@ install: true
 # Build steps
 script:
     - mkdir -p build && cd build
-    - cmake ..
+    - cmake -DBUILD_TESTING=ON ..
     - make
     - ./glimpse --version
