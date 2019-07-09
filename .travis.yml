@@ -59,10 +59,10 @@ install: true
 # Build steps
 script:
   - |
-    if [ "${CC}" = "/usr/local/opt/llvm/bin/clang" ]; then
-      export CXXFLAGS="-L$(brew --prefix libomp)/lib"
+    if [ "${TRAVIS_OS_NAME}" = "osx" ]; then
+      export LDFLAGS="-L$(brew --prefix libomp)/lib"
     fi
   - mkdir -p build && cd build
   - cmake ..
-  - make
+  - make VERBOSE=1
   - ./glimpse --version

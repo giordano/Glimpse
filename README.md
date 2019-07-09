@@ -19,6 +19,7 @@ Glimpse depends on the following software:
 * **NFFT** version 3.2 or later
 * **cfitsio** and **CCFits**
 * **GSL**
+* **OpenMP**
 * **CMake** version 2.8 or later
 
 These dependencies can easily be installed using a package manager:
@@ -45,6 +46,15 @@ Once the requirements are installed, Glimpse can be compiled by running the  fol
     $ make
   ```
 This will create a Glimpse executable in the build directory.
+
+#### macOS users
+
+If you installed OpenMP with HomeBrew, you will probably need to set the
+[`LDFLAGS`](https://cmake.org/cmake/help/latest/envvar/LDFLAGS.html) environment
+variable in the following way before running `cmake`:
+```
+LDFLAGS="-L$(brew --prefix libomp)/lib"
+```
 
 ## 2D Usage
 
