@@ -41,7 +41,8 @@ find_package(Boost     COMPONENTS program_options REQUIRED)
 ExternalProject_Add(NICAEA
         PREFIX NICAEA
         GIT_REPOSITORY ${NICAEA_URL}
-	GIT_TAG d813b133a3aadab8f234ecfb9d7e7146618a2cb3)
+        GIT_TAG d813b133a3aadab8f234ecfb9d7e7146618a2cb3
+        CMAKE_CACHE_ARGS "-DFFTW_ROOT:FILEPATH=${FFTW_ROOT}")
         set(NICAEA_LIBRARY_DIR ${CMAKE_BINARY_DIR}/NICAEA/src/NICAEA/lib)
         set(NICAEA_INCLUDE_DIR ${CMAKE_BINARY_DIR}/NICAEA/src/NICAEA/include)
         set(NICAEA_LIBRARIES -lnicaea)
@@ -98,14 +99,13 @@ configure_file(
 
 find_package(CUDA)
 
-set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}  -O3")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -fpermissive -Xpreprocessor -fopenmp -lomp -I/usr/local/include -L/usr/local/lib -std=c++11")
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fpermissive -Xpreprocessor -fopenmp -lomp -I/usr/local/include -L/usr/local/lib -std=c++11 -DDEBUG_FITS")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -fpermissive -Xpreprocessor -fopenmp -lomp -std=c++11")
 else()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -fpermissive -fopenmp -std=c++11")
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fpermissive -fopenmp -std=c++11 -DDEBUG_FITS")
 endif()
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG_FITS")
 
 if(${CUDA_FOUND})
     message("Compiling CUDA accelerated reconstruction code, with 3D support")
@@ -135,43 +135,44 @@ target_link_libraries(glimpse ${NICAEA_LIBRARIES}
                               ${ARMADILLO_LIBRARIES})
 
 # Testing
-enable_testing()
+if(BUILD_TESTING)
+  find_package(Catch2 REQUIRED)
+  enable_testing()
 
-add_executable(test_wavelet_transform test/test_wavelet_transform.cpp
-									  src/wavelet_transform.cpp
-									  src/starlet_2d.cpp)
-target_include_directories(test_wavelet_transform PRIVATE /usr/local/include)
-target_compile_options(test_wavelet_transform PRIVATE -std=c++11)
-target_link_libraries(test_wavelet_transform ${SPARSE2D_LIBRARIES}
-											 ${FFTW_LIBRARIES}
-											 ${CCFITS_LIBRARY}
-											 ${CFITSIO_LIBRARY})
-add_dependencies(test_wavelet_transform SPARSE2D)
+  add_executable(test_wavelet_transform test/test_wavelet_transform.cpp
+    src/wavelet_transform.cpp
+    src/starlet_2d.cpp)
+  target_include_directories(test_wavelet_transform PRIVATE /usr/local/include)
+  target_compile_options(test_wavelet_transform PRIVATE -std=c++11)
+  target_link_libraries(test_wavelet_transform ${SPARSE2D_LIBRARIES}
+    ${FFTW_LIBRARIES}
+    ${CCFITS_LIBRARY}
+    ${CFITSIO_LIBRARY})
+  add_dependencies(test_wavelet_transform SPARSE2D)
 
-add_test( test_wavelet_transform_test test_wavelet_transform )
+  add_test( test_wavelet_transform_test test_wavelet_transform )
 
+  add_executable(test_field test/test_field.cpp
+    src/survey.cpp
+    src/redshift_distribution.cpp
+    src/field.cpp
+    # src/surface_reconstruction.cpp
+    # src/density_reconstruction.cpp
+    src/starlet_2d.cpp
+    src/wavelet_transform.cpp
+    )
+  target_link_libraries(test_field ${NICAEA_LIBRARIES}
+    ${SPARSE2D_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${GSL_LIBRARIES}
+    ${NFFT_LIBRARIES}
+    ${FFTW_LIBRARIES}
+    ${CCFITS_LIBRARY}
+    ${CFITSIO_LIBRARY}
+    ${ARMADILLO_LIBRARIES}
+    Catch2::Catch2)
+  add_dependencies(test_field NICAEA
+    SPARSE2D)
 
-add_executable(test_field test/test_field.cpp
-						  src/survey.cpp
-						  src/redshift_distribution.cpp
-						  src/field.cpp
-#						  src/surface_reconstruction.cpp
-#						  src/density_reconstruction.cpp
-						  src/starlet_2d.cpp
-						  src/wavelet_transform.cpp
-						  )
-target_include_directories(test_field PRIVATE /usr/local/include)
-target_compile_options(test_field PRIVATE -std=c++11 -g)
-target_link_libraries(test_field ${NICAEA_LIBRARIES}
-                                 ${SPARSE2D_LIBRARIES}
-                             	 ${Boost_LIBRARIES}
-                              	 ${GSL_LIBRARIES}
-                          	     ${NFFT_LIBRARIES}
-                             	 ${FFTW_LIBRARIES}
-                             	 ${CCFITS_LIBRARY}
-                             	 ${CFITSIO_LIBRARY}
-                             	 ${ARMADILLO_LIBRARIES})
-add_dependencies(test_field NICAEA
-							SPARSE2D)
-
-add_test( test_field_test test_field )
+  add_test( test_field_test test_field )
+endif()

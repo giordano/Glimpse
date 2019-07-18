@@ -30,14 +30,14 @@ matrix:
       name: "GNU/Linux with GCC"
     - os: osx
       name: "macOS with AppleClang"
-      osx_image: xcode10.1
+      osx_image: xcode10.2
       addons:
         homebrew:
           packages:
             - *macos_packages
     - os: osx
       name: "macOS with vanilla Clang"
-      osx_image: xcode10.1
+      osx_image: xcode10.2
       env:
         - MATRIX_EVAL="CC=/usr/local/opt/llvm/bin/clang && CXX=/usr/local/opt/llvm/bin/clang++"
       addons:
@@ -53,12 +53,28 @@ cache:
 
 before_install:
   - eval "${MATRIX_EVAL}"
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew update && brew install catch2; fi
+  - |
+    if [ "${TRAVIS_OS_NAME}" = "linux" ]; then
+      cd "$HOME"
+      git clone https://github.com/catchorg/Catch2.git
+      cd Catch2
+      cmake -Bbuild -H. -DBUILD_TESTING=OFF
+      sudo cmake --build build/ --target install
+      cd "$TRAVIS_BUILD_DIR"
+    fi
 
 install: true
 
 # Build steps
 script:
-    - mkdir -p build && cd build
-    - cmake ..
-    - make
-    - ./glimpse --version
+  - |
+    if [ "${TRAVIS_OS_NAME}" = "osx" ]; then
+      export LDFLAGS="-L$(brew --prefix libomp)/lib"
+    fi
+  - mkdir -p build && cd build
+  - cmake -DBUILD_TESTING=ON ..
+  - make VERBOSE=1
+  - ./glimpse --version
+  - ./test_wavelet_transform
+  # - ./test_field
