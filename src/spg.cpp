@@ -34,8 +34,13 @@
 
 #include <sparse2d/IM_IO.h>
 #include <iostream>
+#include <string>
 #include "spg.h"
 #include "spg.cuh"
+
+#ifndef CAPTURE_OUTPUT
+#define CAPTURE_OUTPUT true
+#endif
 
 spg::spg ( int npix, int nz, int nframes, const double *P, const float *l1_weights ) :
     npix ( npix ), nz ( nz ), nframes ( nframes )
@@ -111,6 +116,12 @@ spg::spg ( int npix, int nz, int nframes, const double *P, const float *l1_weigh
         checkCudaErrors ( cudaSetDevice ( whichGPUs[i] ) );
         spg_store_matrix ( nz, p, pp );
     }
+
+    if (CAPTURE_OUTPUT) {
+        write_config_file();
+        write_p_pp();
+    }
+
 
     timer = NULL;
     sdkCreateTimer ( &timer );
@@ -190,6 +201,10 @@ void spg::prox_l1 ( float *alpha, int niter, bool do_output )
         
     }
 
+    if (do_output && CAPTURE_OUTPUT) {
+        write_u_x("i");
+    }
+
     for ( int i = 0; i < nGPU; i++ ) {
         // Select GPU
         checkCudaErrors ( cudaSetDevice ( whichGPUs[i] ) );
@@ -212,6 +227,11 @@ void spg::prox_l1 ( float *alpha, int niter, bool do_output )
         checkCudaErrors ( cudaDeviceSynchronize() );
         checkCudaErrors ( cudaPeekAtLastError() );
     }
+
+    if (do_output && CAPTURE_OUTPUT) {
+        write_u_x("o");
+    }
+
     sdkStopTimer ( &timer );
     std::cout << "Time spent for solving l1 spg " <<  sdkGetTimerValue ( &timer ) << std::endl;
 }
@@ -229,4 +249,42 @@ void spg::update_weights ( float *l1_weights )
         checkCudaErrors ( cudaSetDevice ( whichGPUs[i] ) );
         checkCudaErrors ( cudaDeviceSynchronize() );
     }
+}
+
+void spg::write_config_file( )
+{
+    std::ofstream cfgstream;
+    cfgstream.open("spg.cfg", std::fstream::trunc);
+
+    cfgstream << "[dimensions]" << std::endl;
+    cfgstream << "npix=" << npix << std::endl;
+    cfgstream << "nz=" << nz << std::endl;
+
+    cfgstream.close();
+}
+
+void spg::write_p_pp( )
+{
+    std::ofstream pstream;
+    pstream.open("p.dat", std::fstream::out | std::fstream::trunc | std::fstream::binary);
+    pstream.write(reinterpret_cast<char *> (p), sizeof(float) * nz * nz);
+    pstream.close();
+
+    pstream.open("pp.dat", std::fstream::out | std::fstream::trunc | std::fstream::binary);
+    pstream.write(reinterpret_cast<char *> (pp), sizeof(float) * nz * nz);
+    pstream.close();
+}
+
+void spg::write_u_x(char* suffix)
+{
+    std::ofstream uxstream;
+
+    uxstream.open(std::string("u").append(suffix).append(".dat"), std::fstream::out | std::fstream::trunc | std::fstream::binary);
+    uxstream.write(reinterpret_cast<char *> (d_u_pos[0]), sizeof(float) * coeff_stride_pos[0] * nz);
+    uxstream.close();
+
+    uxstream.open(std::string("x").append(suffix).append(".dat"), std::fstream::out | std::fstream::trunc | std::fstream::binary);
+    uxstream.write(reinterpret_cast<char *> (d_x[0]), sizeof(float) * coeff_stride[0] * nz);
+    uxstream.close();
+
 }
