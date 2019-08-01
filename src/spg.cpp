@@ -137,7 +137,7 @@ spg::~spg()
     free ( pp );
 }
 
-void spg::prox_pos ( float *delta, int niter )
+void spg::prox_pos ( float *delta, int niter, bool do_output )
 {
     sdkResetTimer ( &timer );
     sdkStartTimer ( &timer );
@@ -176,7 +176,7 @@ void spg::prox_pos ( float *delta, int niter )
     std::cout << "Time spent for solving positivity spg " <<  sdkGetTimerValue ( &timer ) << std::endl;
 }
 
-void spg::prox_l1 ( float *alpha, int niter )
+void spg::prox_l1 ( float *alpha, int niter, bool do_output )
 {
     sdkResetTimer ( &timer );
     sdkStartTimer ( &timer );

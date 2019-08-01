@@ -337,7 +337,7 @@ void density_reconstruction::run_main_iteration(long int niter, bool debias)
             }
 
 #ifdef CUDA_ACC
-            prox->prox_pos(alpha_tmp);
+            prox->prox_pos(alpha_tmp, do_output = (iter == niter/2));
 #else
 
 #endif
