@@ -44,7 +44,8 @@ extern int gpuCount;
 // Sets the number and IDs of GPUs to use
 static void setWhichGPUs(int count, int* whichGPUs){
     
-    gpuCount = count;
+//    gpuCount = count;
+    gpuCount = 1;
     int i = 0;
     for(i=0; i < count; i++){
         gpuIDs[i] = whichGPUs[i];
