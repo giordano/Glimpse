@@ -261,6 +261,10 @@ void spg::write_config_file( )
     cfgstream << "nz=" << nz << std::endl;
 
     cfgstream.close();
+
+    std::cerr << "nz = " << nz << std::endl;
+    std::cerr << "npix = " << npix << std::endl;
+    std::cerr << "nframes = " << nframes << std::endl;
 }
 
 void spg::write_p_pp( )
@@ -281,7 +285,6 @@ void spg::write_u_x(char* suffix)
 
     std::cerr << "coeff_stride_pos[0] = " << coeff_stride_pos[0] << ", ";
     std::cerr << "coeff_stride[0] = " << coeff_stride[0] << ", ";
-    std::cerr << "nz = " << nz << std::endl;
 
     std::string uname = "u";
     std::string xname = "x";
@@ -292,36 +295,17 @@ void spg::write_u_x(char* suffix)
     long u_buffer_bytes = sizeof(float) * coeff_stride_pos[0] * nz;
     long x_buffer_bytes = sizeof(float) * coeff_stride[0] * nz;
 
+    long alpha_bytes = sizeof(float) * npix * npix * nframes * nz;
+
     std::cerr << "x buffer is " << u_buffer_bytes << std::endl;
     std::cerr << "y buffer is " << x_buffer_bytes << std::endl;
 
-    uxstream.exceptions( std::ofstream::eofbit | std::ofstream::failbit | std::ofstream::badbit );
-
-    std::cerr << "Opening file" << std::endl;
-
     uxstream.open(uname, std::fstream::out | std::fstream::trunc | std::fstream::binary);
-
-    std::cerr << "Opened file, commencing write" << std::endl;
-
-    try {
-        uxstream.write(reinterpret_cast<char *> (d_u_pos[0]), u_buffer_bytes);
-    } catch (std::ofstream::failure e) {
-        std::cerr << "Exception writing to u file: " << e.what() << std::endl;
-    }
-
-    std::cerr << "Wrote data, closing file" << std::endl;
-//    uxstream.flush();
+    uxstream.write(reinterpret_cast<char *> (d_u_pos[0]), u_buffer_bytes);
     uxstream.close();
 
-
-
     uxstream.open(xname, std::fstream::out | std::fstream::trunc | std::fstream::binary);
-    try {
-        uxstream.write(reinterpret_cast<char *> (d_x[0]), x_buffer_bytes);
-    } catch (std::ofstream::failure e) {
-        std::cerr << "Exception writing to x file: " << e.what() << std::endl;
-    }
-//    uxstream.flush();
+    uxstream.write(reinterpret_cast<char *> (d_x[0]), x_buffer_bytes);
     uxstream.close();
 
 }
