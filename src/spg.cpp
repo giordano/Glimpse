@@ -283,14 +283,26 @@ void spg::write_u_x(char* suffix)
     std::cerr << "coeff_stride[0] = " << coeff_stride[0] << ", ";
     std::cerr << "nz = " << nz << std::endl;
 
-    uxstream.open(std::string("u").append(suffix).append(".dat"), std::fstream::out | std::fstream::trunc | std::fstream::binary);
-    uxstream.write(reinterpret_cast<char *> (d_u_pos[0]), sizeof(float) * coeff_stride_pos[0] * nz);
-    uxstream.flush();
+    std::string uname = "u";
+    std::string xname = "x";
+    std::string extension = ".dat";
+    uname.append(suffix).append(extension);
+    xname.append(suffix).append(extension);
+
+    long u_buffer_bytes = sizeof(float) * coeff_stride_pos[0] * nz;
+    long x_buffer_bytes = sizeof(float) * coeff_stride[0] * nz;
+
+    std::cerr << "x buffer is " << u_buffer_bytes << std::endl;
+    std::cerr << "y buffer is " << x_buffer_bytes << std::endl;
+
+    uxstream.open(uname, std::fstream::out | std::fstream::trunc | std::fstream::binary);
+    uxstream.write(reinterpret_cast<char *> (d_u_pos[0]), u_buffer_bytes);
+//    uxstream.flush();
     uxstream.close();
 
-    uxstream.open(std::string("x").append(suffix).append(".dat"), std::fstream::out | std::fstream::trunc | std::fstream::binary);
-    uxstream.write(reinterpret_cast<char *> (d_x[0]), sizeof(float) * coeff_stride[0] * nz);
-    uxstream.flush();
+    uxstream.open(xname, std::fstream::out | std::fstream::trunc | std::fstream::binary);
+    uxstream.write(reinterpret_cast<char *> (d_x[0]), x_buffer_bytes);
+//    uxstream.flush();
     uxstream.close();
 
 }
