@@ -297,14 +297,23 @@ void spg::write_u_x(char* suffix)
 
     uxstream.exceptions( std::ofstream::eofbit | std::ofstream::failbit | std::ofstream::badbit );
 
+    std::cerr << "Opening file" << std::endl;
+
     uxstream.open(uname, std::fstream::out | std::fstream::trunc | std::fstream::binary);
+
+    std::cerr << "Opened file, commencing write" << std::endl;
+
     try {
         uxstream.write(reinterpret_cast<char *> (d_u_pos[0]), u_buffer_bytes);
     } catch (std::ofstream::failure e) {
         std::cerr << "Exception writing to u file: " << e.what() << std::endl;
     }
+
+    std::cerr << "Wrote data, closing file" << std::endl;
 //    uxstream.flush();
     uxstream.close();
+
+
 
     uxstream.open(xname, std::fstream::out | std::fstream::trunc | std::fstream::binary);
     try {
