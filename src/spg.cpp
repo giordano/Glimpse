@@ -295,13 +295,23 @@ void spg::write_u_x(char* suffix)
     std::cerr << "x buffer is " << u_buffer_bytes << std::endl;
     std::cerr << "y buffer is " << x_buffer_bytes << std::endl;
 
+    uxstream.exceptions( std::ofstream::eofbit | std::ofstream::failbit | std::ofstream::badbit );
+
     uxstream.open(uname, std::fstream::out | std::fstream::trunc | std::fstream::binary);
-    uxstream.write(reinterpret_cast<char *> (d_u_pos[0]), u_buffer_bytes);
+    try {
+        uxstream.write(reinterpret_cast<char *> (d_u_pos[0]), u_buffer_bytes);
+    } catch (std::ofstream::failure e) {
+        std::cerr << "Exception writing to u file: " << e.what() << std::endl;
+    }
 //    uxstream.flush();
     uxstream.close();
 
     uxstream.open(xname, std::fstream::out | std::fstream::trunc | std::fstream::binary);
-    uxstream.write(reinterpret_cast<char *> (d_x[0]), x_buffer_bytes);
+    try {
+        uxstream.write(reinterpret_cast<char *> (d_x[0]), x_buffer_bytes);
+    } catch (std::ofstream::failure e) {
+        std::cerr << "Exception writing to x file: " << e.what() << std::endl;
+    }
 //    uxstream.flush();
     uxstream.close();
 
