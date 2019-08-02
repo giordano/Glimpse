@@ -281,10 +281,12 @@ void spg::write_u_x(char* suffix)
 
     uxstream.open(std::string("u").append(suffix).append(".dat"), std::fstream::out | std::fstream::trunc | std::fstream::binary);
     uxstream.write(reinterpret_cast<char *> (d_u_pos[0]), sizeof(float) * coeff_stride_pos[0] * nz);
+    uxstream.flush();
     uxstream.close();
 
     uxstream.open(std::string("x").append(suffix).append(".dat"), std::fstream::out | std::fstream::trunc | std::fstream::binary);
     uxstream.write(reinterpret_cast<char *> (d_x[0]), sizeof(float) * coeff_stride[0] * nz);
+    uxstream.flush();
     uxstream.close();
 
 }
