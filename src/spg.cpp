@@ -292,7 +292,7 @@ void spg::write_l1_weights( )
 {
     std::ofstream wstream;
 
-    float* w_rec = new float[npix * npix * nframes];
+    float* w_rec = new float[npix * npix * nframes * nz];
 
     checkCudaErrors( cudaMemcpy2D(
             w_rec, npix * npix * nframes * sizeof(float),
@@ -302,8 +302,10 @@ void spg::write_l1_weights( )
             ) );
 
     wstream.open("w.dat", std::fstream::out | std::fstream::trunc | std::fstream::binary);
-    wstream.write(reinterpret_cast<char *> (w_rec), sizeof(float) * npix * npix * nframes);
+    wstream.write(reinterpret_cast<char *> (w_rec), sizeof(float) * npix * npix * nframes * nz);
     wstream.close();
+
+    delete[] w_rec;
 }
 
 void spg::write_pos_data(char* suffix)
@@ -392,5 +394,8 @@ void spg::write_l1_data(char* suffix)
     l1stream.open(uname, std::fstream::out | std::fstream::trunc | std::fstream::binary);
     l1stream.write(reinterpret_cast<char *> (u_rec), buffer_bytes);
     l1stream.close( );
+
+    delete[] alpha_rec;
+    delete[] u_rec;
 
 }
