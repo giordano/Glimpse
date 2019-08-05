@@ -161,6 +161,10 @@ void spg::prox_pos ( float *delta, int niter, bool do_output )
         checkCudaErrors ( cudaMemcpy2DAsync ( d_x[i], coeff_stride_pos[i]*sizeof ( float ), &delta[i * coeff_stride_pos[0]], npix * npix * sizeof ( float ), coeff_stride_pos[i]*sizeof ( float ), nz, cudaMemcpyHostToDevice ) );
     }
 
+    if (do_output && CAPTURE_OUTPUT) {
+        write_u_x("i");
+    }
+
     for ( int i = 0; i < nGPU; i++ ) {
         // Select GPU
         checkCudaErrors ( cudaSetDevice ( whichGPUs[i] ) );
@@ -175,6 +179,10 @@ void spg::prox_pos ( float *delta, int niter, bool do_output )
 
         // Recover wavelet coefficients from device
         checkCudaErrors ( cudaMemcpy2DAsync ( &delta[i * coeff_stride_pos[0]], npix * npix * sizeof ( float ), d_x[i], coeff_stride_pos[i]*sizeof ( float ), coeff_stride_pos[i]*sizeof ( float ), nz, cudaMemcpyDeviceToHost ) );
+    }
+
+    if (do_output && CAPTURE_OUTPUT) {
+        write_u_x("o");
     }
 
     for ( int i = 0; i < nGPU; i++ ) {
@@ -201,10 +209,6 @@ void spg::prox_l1 ( float *alpha, int niter, bool do_output )
         
     }
 
-    if (do_output && CAPTURE_OUTPUT) {
-        write_u_x("i");
-    }
-
     for ( int i = 0; i < nGPU; i++ ) {
         // Select GPU
         checkCudaErrors ( cudaSetDevice ( whichGPUs[i] ) );
@@ -226,10 +230,6 @@ void spg::prox_l1 ( float *alpha, int niter, bool do_output )
 
         checkCudaErrors ( cudaDeviceSynchronize() );
         checkCudaErrors ( cudaPeekAtLastError() );
-    }
-
-    if (do_output && CAPTURE_OUTPUT) {
-        write_u_x("o");
     }
 
     sdkStopTimer ( &timer );
@@ -336,5 +336,6 @@ void spg::write_u_x(char* suffix)
 
     delete[] alpha_rec;
     delete[] u_pos_rec;
+
 
 }
