@@ -283,18 +283,35 @@ void spg::write_u_x(char* suffix)
 {
     std::ofstream uxstream;
 
-    std::cerr << "coeff_stride_pos[0] = " << coeff_stride_pos[0] << ", ";
-    std::cerr << "coeff_stride[0] = " << coeff_stride[0] << ", ";
+//    std::cerr << "coeff_stride_pos[0] = " << coeff_stride_pos[0] << ", ";
+//    std::cerr << "coeff_stride[0] = " << coeff_stride[0] << ", ";
 
-    std::cerr << "alpha pitch = " << npix * npix * nframes * sizeof ( float ) << ", x pitch = " << sizeof ( float ) * coeff_stride[0] << std::endl;
+
+//    std::cerr << "alpha pitch = " << npix * npix * nframes * sizeof ( float ) << ", x pitch = " << sizeof ( float ) * coeff_stride[0] << std::endl;
 //    std::cerr << "u_pos pitch = " << sizeof ( float ) * coeff_stride_pos[0] * nz;
 
     std::string uname = "u";
     std::string xname = "x";
     std::string extension = ".dat";
 
-    // Get wavelet coefficients (cribbed from main iteration)
+    // Allocate memory to receive the data
+    float* alpha_rec = new float[npix * npix * nframes * nz];
+    float* u_pos_rec = new float[npix * npix * nz];
 
+    // Synchronously get the data. It will be needed immediately. Assumes ngpu == 1
+    checkCudaErrors( cudaMemcpy2D(
+            alpha_rec, npix * npix * nframes * sizeof(float),
+            d_x[0], coeff_stride[0] * sizeof(float),
+            coeff_stride[0] * sizeof(float), nz,
+            cudaMemcpyDeviceToHost
+            ) );
+
+    checkCudaErrors( cudaMemcpy2D(
+            u_pos_rec, npix * npix * sizeof(float),
+            d_u_pos[0], coeff_stride_pos[0] * sizeof(float),
+            coeff_stride_pos[0] * sizeof(float), nz,
+            cudaMemcpyDeviceToHost
+        ) );
 
 
 
@@ -306,15 +323,18 @@ void spg::write_u_x(char* suffix)
 
     long alpha_bytes = sizeof(float) * npix * npix * nframes * nz;
 
-    std::cerr << "x buffer is " << u_buffer_bytes << std::endl;
-    std::cerr << "y buffer is " << x_buffer_bytes << std::endl;
+//    std::cerr << "x buffer is " << u_buffer_bytes << std::endl;
+//    std::cerr << "y buffer is " << x_buffer_bytes << std::endl;
 
     uxstream.open(uname, std::fstream::out | std::fstream::trunc | std::fstream::binary);
-    uxstream.write(reinterpret_cast<char *> (d_u_pos[0]), u_buffer_bytes);
+    uxstream.write(reinterpret_cast<char *> (u_pos_rec), u_buffer_bytes);
     uxstream.close();
 
     uxstream.open(xname, std::fstream::out | std::fstream::trunc | std::fstream::binary);
-    uxstream.write(reinterpret_cast<char *> (d_x[0]), x_buffer_bytes);
+    uxstream.write(reinterpret_cast<char *> (alpha_rec), alpha_bytes);
     uxstream.close();
+
+    delete[] alpha_rec;
+    delete[] u_pos_rec;
 
 }
