@@ -286,9 +286,18 @@ void spg::write_u_x(char* suffix)
     std::cerr << "coeff_stride_pos[0] = " << coeff_stride_pos[0] << ", ";
     std::cerr << "coeff_stride[0] = " << coeff_stride[0] << ", ";
 
+    std::cerr << "alpha size = " << npix * npix * nframes * sizeof ( float ) << ", x size = " << sizeof ( float ) * coeff_stride[0] * nz << std::endl;
+    std::cerr << "u_pos size = " << sizeof ( float ) * coeff_stride_pos[0] * nz;
+
     std::string uname = "u";
     std::string xname = "x";
     std::string extension = ".dat";
+
+    // Get wavelet coefficients (cribbed from main iteration)
+
+
+
+
     uname.append(suffix).append(extension);
     xname.append(suffix).append(extension);
 
