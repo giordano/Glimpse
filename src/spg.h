@@ -95,7 +95,9 @@ public:
 private:
     void write_config_file();
     void write_p_pp();
+    void write_l1_weights();
     void write_pos_data(char* suffix);
+    void write_l1_data(char* suffix);
 };
 
 

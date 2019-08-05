@@ -119,6 +119,7 @@ spg::spg ( int npix, int nz, int nframes, const double *P, const float *l1_weigh
 
     if (CAPTURE_OUTPUT) {
         write_config_file();
+        write_l1_weights();
         write_p_pp();
     }
 
@@ -209,6 +210,10 @@ void spg::prox_l1 ( float *alpha, int niter, bool do_output )
         
     }
 
+    if (do_output && CAPTURE_OUTPUT) {
+        write_l1_data("i");
+    }
+
     for ( int i = 0; i < nGPU; i++ ) {
         // Select GPU
         checkCudaErrors ( cudaSetDevice ( whichGPUs[i] ) );
@@ -230,6 +235,10 @@ void spg::prox_l1 ( float *alpha, int niter, bool do_output )
 
         checkCudaErrors ( cudaDeviceSynchronize() );
         checkCudaErrors ( cudaPeekAtLastError() );
+    }
+
+    if (do_output && CAPTURE_OUTPUT) {
+        write_l1_data("i");
     }
 
     sdkStopTimer ( &timer );
@@ -279,12 +288,30 @@ void spg::write_p_pp( )
     pstream.close();
 }
 
+void spg::write_l1_weights( )
+{
+    std::ofstream wstream;
+
+    float* w_rec = new float[npix * npix * nframes];
+
+    checkCudaErrors( cudaMemcpy2D(
+            w_rec, npix * npix * nframes * sizeof(float),
+            d_w[0], coeff_stride[0] * sizeof(float),
+            coeff_stride[0]*sizeof(float), nz,
+            cudaMemcpyDeviceToHost
+            ) );
+
+    wstream.open("w.dat", std::fstream::out | std::fstream::trunc | std::fstream::binary);
+    wstream.write(reinterpret_cast<char *> (w_rec), sizeof(float) * npix * npix * nframes);
+    wstream.close();
+}
+
 void spg::write_pos_data(char* suffix)
 {
     std::ofstream uxstream;
 
-    std::string uname = "u";
-    std::string xname = "x";
+    std::string uname = "upos_";
+    std::string xname = "delta_";
     std::string extension = ".dat";
 
     // Allocate memory to receive the data
@@ -323,5 +350,47 @@ void spg::write_pos_data(char* suffix)
     delete[] alpha_rec;
     delete[] u_pos_rec;
 
+
+}
+
+void spg::write_l1_data(char* suffix)
+{
+    std::ofstream l1stream;
+
+    std::string uname = "u_";
+    std::string xname = "alpha_";
+    std::string extension = ".dat";
+
+    uname.append(suffix).append(extension);
+    xname.append(suffix).append(extension);
+
+    // Allocate memory to receive the data
+    float* alpha_rec = new float[npix * npix * nframes * nz];
+    float* u_rec = new float[npix * npix * nframes * nz];
+
+    // Synchronously get the data. It will be needed immediately. Assumes ngpu == 1
+    checkCudaErrors( cudaMemcpy2D(
+            alpha_rec, npix * npix * nframes * sizeof(float),
+            d_x[0], coeff_stride[0] * sizeof(float),
+            coeff_stride[0] * sizeof(float), nz,
+            cudaMemcpyDeviceToHost
+            ) );
+
+    checkCudaErrors( cudaMemcpy2D(
+            u_rec, npix * npix * nframes * sizeof(float),
+            d_x[0], coeff_stride[0] * sizeof(float),
+            coeff_stride[0] * sizeof(float), nz,
+            cudaMemcpyDeviceToHost
+            ) );
+
+    long buffer_bytes = sizeof(float) * npix * npix * nframes * nz;
+
+    l1stream.open(xname, std::fstream::out | std::fstream::trunc | std::fstream::binary);
+    l1stream.write(reinterpret_cast<char *> (alpha_rec), buffer_bytes);
+    l1stream.close( );
+
+    l1stream.open(uname, std::fstream::out | std::fstream::trunc | std::fstream::binary);
+    l1stream.write(reinterpret_cast<char *> (u_rec), buffer_bytes);
+    l1stream.close( );
 
 }
