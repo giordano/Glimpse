@@ -238,7 +238,7 @@ void spg::prox_l1 ( float *alpha, int niter, bool do_output )
     }
 
     if (do_output && CAPTURE_OUTPUT) {
-        write_l1_data("i");
+        write_l1_data("o");
     }
 
     sdkStopTimer ( &timer );
