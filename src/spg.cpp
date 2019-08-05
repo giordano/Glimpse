@@ -162,7 +162,7 @@ void spg::prox_pos ( float *delta, int niter, bool do_output )
     }
 
     if (do_output && CAPTURE_OUTPUT) {
-        write_u_x("i");
+        write_pos_data("i");
     }
 
     for ( int i = 0; i < nGPU; i++ ) {
@@ -182,7 +182,7 @@ void spg::prox_pos ( float *delta, int niter, bool do_output )
     }
 
     if (do_output && CAPTURE_OUTPUT) {
-        write_u_x("o");
+        write_pos_data("o");
     }
 
     for ( int i = 0; i < nGPU; i++ ) {
@@ -279,16 +279,9 @@ void spg::write_p_pp( )
     pstream.close();
 }
 
-void spg::write_u_x(char* suffix)
+void spg::write_pos_data(char* suffix)
 {
     std::ofstream uxstream;
-
-//    std::cerr << "coeff_stride_pos[0] = " << coeff_stride_pos[0] << ", ";
-//    std::cerr << "coeff_stride[0] = " << coeff_stride[0] << ", ";
-
-
-//    std::cerr << "alpha pitch = " << npix * npix * nframes * sizeof ( float ) << ", x pitch = " << sizeof ( float ) * coeff_stride[0] << std::endl;
-//    std::cerr << "u_pos pitch = " << sizeof ( float ) * coeff_stride_pos[0] * nz;
 
     std::string uname = "u";
     std::string xname = "x";
@@ -313,18 +306,11 @@ void spg::write_u_x(char* suffix)
             cudaMemcpyDeviceToHost
         ) );
 
-
-
     uname.append(suffix).append(extension);
     xname.append(suffix).append(extension);
 
     long u_buffer_bytes = sizeof(float) * coeff_stride_pos[0] * nz;
-    long x_buffer_bytes = sizeof(float) * coeff_stride[0] * nz;
-
     long alpha_bytes = sizeof(float) * npix * npix * nframes * nz;
-
-//    std::cerr << "x buffer is " << u_buffer_bytes << std::endl;
-//    std::cerr << "y buffer is " << x_buffer_bytes << std::endl;
 
     uxstream.open(uname, std::fstream::out | std::fstream::trunc | std::fstream::binary);
     uxstream.write(reinterpret_cast<char *> (u_pos_rec), u_buffer_bytes);
