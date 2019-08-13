@@ -159,7 +159,12 @@ void spg::prox_pos ( float *delta, int niter, bool do_output )
         checkCudaErrors ( cudaSetDevice ( whichGPUs[i] ) );
 
         // Copy wavelet coefficients to device
-        checkCudaErrors ( cudaMemcpy2DAsync ( d_x[i], coeff_stride_pos[i]*sizeof ( float ), &delta[i * coeff_stride_pos[0]], npix * npix * sizeof ( float ), coeff_stride_pos[i]*sizeof ( float ), nz, cudaMemcpyHostToDevice ) );
+        checkCudaErrors ( cudaMemcpy2DAsync (
+                d_x[i], coeff_stride_pos[i]*sizeof ( float ),
+                &delta[i * coeff_stride_pos[0]], npix * npix * sizeof ( float ),
+                coeff_stride_pos[i]*sizeof ( float ), nz,
+                cudaMemcpyHostToDevice
+                ) );
     }
 
     if (do_output && CAPTURE_OUTPUT) {
@@ -179,7 +184,12 @@ void spg::prox_pos ( float *delta, int niter, bool do_output )
         checkCudaErrors ( cudaSetDevice ( whichGPUs[i] ) );
 
         // Recover wavelet coefficients from device
-        checkCudaErrors ( cudaMemcpy2DAsync ( &delta[i * coeff_stride_pos[0]], npix * npix * sizeof ( float ), d_x[i], coeff_stride_pos[i]*sizeof ( float ), coeff_stride_pos[i]*sizeof ( float ), nz, cudaMemcpyDeviceToHost ) );
+        checkCudaErrors ( cudaMemcpy2DAsync (
+                &delta[i * coeff_stride_pos[0]], npix * npix * sizeof ( float ),
+                d_x[i], coeff_stride_pos[i]*sizeof ( float ),
+                coeff_stride_pos[i]*sizeof ( float ), nz,
+                cudaMemcpyDeviceToHost
+                ) );
     }
 
     if (do_output && CAPTURE_OUTPUT) {
@@ -206,7 +216,12 @@ void spg::prox_l1 ( float *alpha, int niter, bool do_output )
         checkCudaErrors ( cudaSetDevice ( whichGPUs[i] ) );
 
         // Copy wavelet coefficients to device
-        checkCudaErrors ( cudaMemcpy2DAsync ( d_x[i], coeff_stride[i]*sizeof ( float ), &alpha[i * coeff_stride[0]], npix * npix * nframes * sizeof ( float ), coeff_stride[i]*sizeof ( float ), nz, cudaMemcpyHostToDevice ) );
+        checkCudaErrors ( cudaMemcpy2DAsync (
+                d_x[i], coeff_stride[i]*sizeof ( float ),
+                &alpha[i * coeff_stride[0]], npix * npix * nframes * sizeof ( float ),
+                coeff_stride[i]*sizeof ( float ), nz,
+                cudaMemcpyHostToDevice
+                ) );
         
     }
 
@@ -227,7 +242,12 @@ void spg::prox_l1 ( float *alpha, int niter, bool do_output )
         checkCudaErrors ( cudaSetDevice ( whichGPUs[i] ) );
 
         // Recover wavelet coefficients from device
-        checkCudaErrors ( cudaMemcpy2DAsync ( &alpha[i * coeff_stride[0]], npix * npix * nframes * sizeof ( float ), d_x[i], coeff_stride[i]*sizeof ( float ), coeff_stride[i] * sizeof ( float ), nz, cudaMemcpyDeviceToHost ) );
+        checkCudaErrors ( cudaMemcpy2DAsync (
+                &alpha[i * coeff_stride[0]], npix * npix * nframes * sizeof ( float ),
+                d_x[i], coeff_stride[i]*sizeof ( float ),
+                coeff_stride[i] * sizeof ( float ), nz,
+                cudaMemcpyDeviceToHost
+                ) );
     }
 
     for ( int i = 0; i < nGPU; i++ ) {
