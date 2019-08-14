@@ -342,9 +342,9 @@ void spg::write_pos_data(char* suffix)
 
     // Synchronously get the data. It will be needed immediately. Assumes ngpu == 1
     checkCudaErrors( cudaMemcpy2D(
-            alpha_rec, npix * npix * nframes * sizeof(float),
-            d_x[0], coeff_stride[0] * sizeof(float),
-            coeff_stride[0] * sizeof(float), nz,
+            alpha_rec, npix * npix * sizeof(float),
+            d_x[0], coeff_stride_pos[0] * sizeof(float),
+            coeff_stride_pos[0] * sizeof(float), nz,
             cudaMemcpyDeviceToHost
             ) );
 
@@ -359,7 +359,7 @@ void spg::write_pos_data(char* suffix)
     xname.append(suffix).append(extension);
 
     long u_buffer_bytes = sizeof(float) * coeff_stride_pos[0] * nz;
-    long alpha_bytes = sizeof(float) * npix * npix * nframes * nz;
+    long alpha_bytes = sizeof(float) * npix * npix * nz;
 
     uxstream.open(uname, std::fstream::out | std::fstream::trunc | std::fstream::binary);
     uxstream.write(reinterpret_cast<char *> (u_pos_rec), u_buffer_bytes);
