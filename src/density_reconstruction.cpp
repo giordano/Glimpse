@@ -562,18 +562,18 @@ void density_reconstruction::reconstruct()
     std::cout << "Running main iteration" << std::endl;
     run_main_iteration(nRecIter);
 
-    // Reweighted l1 loop
-    for (int i = 0; i < nreweights ; i++) {
-            f->update_covariance(delta);
-            compute_thresholds(nrandom / 2);
-            compute_weights();
-            run_main_iteration(nRecIter / 2);
-        }
+    // Reweighted l1 loop: don't run it
+//    for (int i = 0; i < nreweights ; i++) {
+//            f->update_covariance(delta);
+//            compute_thresholds(nrandom / 2);
+//            compute_weights();
+//            run_main_iteration(nRecIter / 2);
+//        }
 
-    std::cout  << "Starting debiasing " << std::endl;
-    // Final debiasing step
-    f->update_covariance(delta);
-    run_main_iteration(nRecIterDebias, true);
+//    std::cout  << "Starting debiasing " << std::endl;
+    // Final debiasing step: don't run this either
+//    f->update_covariance(delta);
+//    run_main_iteration(nRecIterDebias, true);
 }
 
 void density_reconstruction::compute_thresholds(int niter)
