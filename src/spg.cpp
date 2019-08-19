@@ -119,8 +119,8 @@ spg::spg ( int npix, int nz, int nframes, const double *P, const float *l1_weigh
 
     if (CAPTURE_OUTPUT) {
         write_config_file();
-        write_l1_weights();
-        write_p_pp();
+        write_l1_weights("i");
+        write_p_pp("i");
     }
 
 
@@ -296,21 +296,31 @@ void spg::write_config_file( )
     std::cerr << "nframes = " << nframes << std::endl;
 }
 
-void spg::write_p_pp( )
+void spg::write_p_pp(char *suffix)
 {
+    std::string pname = "p_";
+    std::string ppname = "pp_";
+    std::string extension = ".dat";
+
+    pname.append(suffix).append(extension);
+    ppname.append(suffix).append(extension);
+
     std::ofstream pstream;
-    pstream.open("p.dat", std::fstream::out | std::fstream::trunc | std::fstream::binary);
+    pstream.open(pname, std::fstream::out | std::fstream::trunc | std::fstream::binary);
     pstream.write(reinterpret_cast<char *> (p), sizeof(float) * nz * nz);
     pstream.close();
 
-    pstream.open("pp.dat", std::fstream::out | std::fstream::trunc | std::fstream::binary);
+    pstream.open(ppname, std::fstream::out | std::fstream::trunc | std::fstream::binary);
     pstream.write(reinterpret_cast<char *> (pp), sizeof(float) * nz * nz);
     pstream.close();
 }
 
-void spg::write_l1_weights( )
+void spg::write_l1_weights(char *suffix)
 {
     std::ofstream wstream;
+
+    std::string wname = "w_";
+    std::string extension = ".dat";
 
     float* w_rec = new float[npix * npix * nframes * nz];
 
@@ -321,7 +331,9 @@ void spg::write_l1_weights( )
             cudaMemcpyDeviceToHost
             ) );
 
-    wstream.open("w.dat", std::fstream::out | std::fstream::trunc | std::fstream::binary);
+    wname.append(suffix).append(extension);
+
+    wstream.open(wname, std::fstream::out | std::fstream::trunc | std::fstream::binary);
     wstream.write(reinterpret_cast<char *> (w_rec), sizeof(float) * npix * npix * nframes * nz);
     wstream.close();
 
