@@ -36,10 +36,10 @@
 #include <iostream>
 #include <fstream>
 #include <CCfits/CCfits>
-#include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
-#include <boost/program_options.hpp>
 #include <boost/algorithm/string.hpp>
+
+#include "glimpse.h"
 
 #include "version.h"
 #include "survey.h"
@@ -48,13 +48,9 @@
 #include "density_reconstruction.h"
 #include "gpu_utils.h"
 
-
-namespace po = boost::program_options;
 using namespace std;
 using namespace CCfits;
 
-void create_config(int argc, char *argv[], boost::property_tree::ptree &pt, po::variables_map &vm);
-int configure_and_run(boost::property_tree::ptree &pt, po::variables_map &vm);
 
 int main(int argc, char *argv[])
 {
