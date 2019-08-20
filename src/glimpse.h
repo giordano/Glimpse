@@ -40,7 +40,7 @@
 
 namespace po = boost::program_options;
 
-void create_config(int argc, char *argv[], boost::property_tree::ptree &pt, po::variables_map &vm);
+int create_config(int argc, char *argv[], boost::property_tree::ptree &pt, po::variables_map &vm);
 int configure_and_run(boost::property_tree::ptree &pt, po::variables_map &vm);
 
 #endif // ndef GLIMPSE_H

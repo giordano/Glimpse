@@ -51,6 +51,15 @@
 using namespace std;
 using namespace CCfits;
 
+const int config_ok_go = 0;
+const int config_ok_halt = 1;
+const int config_exception = 2;
+const int config_gpu_err = 3;
+
+const int return_ok = 0;
+const int return_config_except = 1;
+const int return_gpu_err = -1;
+const int return_fitsio_err = -1;
 
 int main(int argc, char *argv[])
 {
@@ -59,13 +68,22 @@ int main(int argc, char *argv[])
     
     po::variables_map vm;
 
-    create_config(argc, argv, pt, vm);
+    switch (create_config(argc, argv, pt, vm)) {
+        case config_ok_go:
+            break;
+        case config_ok_halt:
+            return return_ok;
+        case config_exception:
+            return return_config_except;
+        case config_gpu_err:
+            return return_gpu_err;
+    }
 
     return configure_and_run(pt, vm);
 
 }
 
-void create_config(int argc, char *argv[], boost::property_tree::ptree &pt, po::variables_map &vm)
+int create_config(int argc, char *argv[], boost::property_tree::ptree &pt, po::variables_map &vm)
 {
     // List of GPU indices
     std::vector<int> IDlist;
@@ -102,16 +120,16 @@ void create_config(int argc, char *argv[], boost::property_tree::ptree &pt, po::
     } catch (po::error &e) {
         std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
         std::cerr << cmdline_options << std::endl;
-        exit(1);
+        return config_exception;
     }
     if (vm.count("help")) {
         cout << cmdline_options << "\n";
-        exit(0);
+        return config_ok_halt;
     }
     
     if (vm.count("version")) {
          cout << VERSION << "\n";
-         exit(0);
+         return config_ok_halt;
     }
     
     // In case of GPU acceleration, parse the list of GPUs
@@ -133,12 +151,12 @@ void create_config(int argc, char *argv[], boost::property_tree::ptree &pt, po::
         if(IDlist.size() > MAX_GPUS){
             cout << "ERROR: Requested more GPUs than maximum number;"<< endl;
             cout << "Maximum size of GPU array " << MAX_GPUS << endl;
-            exit(-1);
+            return config_gpu_except;
         }
         if(IDlist.size() > nGpu){
             cout << "ERROR: Requested more GPUs than available;"<< endl;
             cout << "Number of GPUs available: " << nGpu << endl;
-            exit(-1);
+            return config_gpu_err;
         }
         
         for(int i=0; i < IDlist.size(); i++){
@@ -146,7 +164,7 @@ void create_config(int argc, char *argv[], boost::property_tree::ptree &pt, po::
             if(IDlist[i] >= nGpu){
                 cout << "ERROR: Requested GPU id not available;"<< endl;
                 cout << "Maximum GPU id : " << nGpu - 1 << endl;
-                exit(-1);
+                return config_gpu_err;
             }
             whichGPUs[i] = IDlist[i];
         }
@@ -164,7 +182,7 @@ void create_config(int argc, char *argv[], boost::property_tree::ptree &pt, po::
     } catch (po::error &e) {
         std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
         std::cerr << cmdline_options << std::endl;
-        exit(1);
+        return config_exception;
     }
 
     // Load the configuration file
@@ -172,9 +190,10 @@ void create_config(int argc, char *argv[], boost::property_tree::ptree &pt, po::
         boost::property_tree::ini_parser::read_ini(vm["config"].as<std::string>(), pt);
     } catch (boost::property_tree::ini_parser_error e) {
         std::cout << e.what() << std::endl;
-        exit(-1);
+        return config_exception;
     }
 
+    return config_ok_go;
 }
 
 
@@ -207,7 +226,7 @@ int configure_and_run(boost::property_tree::ptree &pt, po::variables_map &vm)
     catch (FITS::CantCreate)
     {
         std::cerr << "ERROR: Cant create output FITS file" << std::endl;
-        return -1;
+        return return_fitsio_err;
     }
 
     // Array holding the reconstruction
@@ -265,6 +284,6 @@ int configure_and_run(boost::property_tree::ptree &pt, po::variables_map &vm)
     delete f;
     delete surv;
 
-    return 0;
+    return return_ok;
 
 }
