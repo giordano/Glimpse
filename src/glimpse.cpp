@@ -63,9 +63,7 @@ const int return_fitsio_err = -1;
 
 int main(int argc, char *argv[])
 {
-    gsl_rng_env_setup();
     boost::property_tree::ptree pt;
-    
     po::variables_map vm;
 
     switch (create_config(argc, argv, pt, vm)) {
@@ -199,6 +197,8 @@ int create_config(int argc, char *argv[], boost::property_tree::ptree &pt, po::v
 
 int configure_and_run(boost::property_tree::ptree &pt, po::variables_map &vm)
 {
+    gsl_rng_env_setup();
+
     // Create survey object and load data
     survey *surv = new survey(pt);
     surv->load(vm["data"].as<std::string>());
