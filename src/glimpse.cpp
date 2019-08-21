@@ -36,10 +36,10 @@
 #include <iostream>
 #include <fstream>
 #include <CCfits/CCfits>
-#include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
-#include <boost/program_options.hpp>
 #include <boost/algorithm/string.hpp>
+
+#include "glimpse.h"
 
 #include "version.h"
 #include "survey.h"
@@ -48,16 +48,43 @@
 #include "density_reconstruction.h"
 #include "gpu_utils.h"
 
-
-namespace po = boost::program_options;
 using namespace std;
 using namespace CCfits;
+
+const int config_ok_go = 0;
+const int config_ok_halt = 1;
+const int config_exception = 2;
+const int config_gpu_err = 3;
+
+const int return_ok = 0;
+const int return_config_except = 1;
+const int return_gpu_err = -1;
+const int return_fitsio_err = -1;
 
 int main(int argc, char *argv[])
 {
     gsl_rng_env_setup();
     boost::property_tree::ptree pt;
     
+    po::variables_map vm;
+
+    switch (create_config(argc, argv, pt, vm)) {
+        case config_ok_go:
+            break;
+        case config_ok_halt:
+            return return_ok;
+        case config_exception:
+            return return_config_except;
+        case config_gpu_err:
+            return return_gpu_err;
+    }
+
+    return configure_and_run(pt, vm);
+
+}
+
+int create_config(int argc, char *argv[], boost::property_tree::ptree &pt, po::variables_map &vm)
+{
     // List of GPU indices
     std::vector<int> IDlist;
 
@@ -84,8 +111,6 @@ int main(int argc, char *argv[])
     po::options_description cmdline_options;
     cmdline_options.add(generic).add(positional);
     
-    po::variables_map vm;
-
     // Process generic options
     try {
         po::store(po::command_line_parser(argc, argv)
@@ -95,16 +120,16 @@ int main(int argc, char *argv[])
     } catch (po::error &e) {
         std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
         std::cerr << cmdline_options << std::endl;
-        return 1;
+        return config_exception;
     }
     if (vm.count("help")) {
         cout << cmdline_options << "\n";
-        return 0;
+        return config_ok_halt;
     }
     
     if (vm.count("version")) {
          cout << VERSION << "\n";
-         return 0;
+         return config_ok_halt;
     }
     
     // In case of GPU acceleration, parse the list of GPUs
@@ -126,12 +151,12 @@ int main(int argc, char *argv[])
         if(IDlist.size() > MAX_GPUS){
             cout << "ERROR: Requested more GPUs than maximum number;"<< endl;
             cout << "Maximum size of GPU array " << MAX_GPUS << endl;
-            return -1;
+            return config_gpu_except;
         }
         if(IDlist.size() > nGpu){
             cout << "ERROR: Requested more GPUs than available;"<< endl;
             cout << "Number of GPUs available: " << nGpu << endl;
-            return -1;
+            return config_gpu_err;
         }
         
         for(int i=0; i < IDlist.size(); i++){
@@ -139,7 +164,7 @@ int main(int argc, char *argv[])
             if(IDlist[i] >= nGpu){
                 cout << "ERROR: Requested GPU id not available;"<< endl;
                 cout << "Maximum GPU id : " << nGpu - 1 << endl;
-                return -1;
+                return config_gpu_err;
             }
             whichGPUs[i] = IDlist[i];
         }
@@ -157,7 +182,7 @@ int main(int argc, char *argv[])
     } catch (po::error &e) {
         std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
         std::cerr << cmdline_options << std::endl;
-        return 1;
+        return config_exception;
     }
 
     // Load the configuration file
@@ -165,27 +190,33 @@ int main(int argc, char *argv[])
         boost::property_tree::ini_parser::read_ini(vm["config"].as<std::string>(), pt);
     } catch (boost::property_tree::ini_parser_error e) {
         std::cout << e.what() << std::endl;
-        exit(-1);
+        return config_exception;
     }
 
+    return config_ok_go;
+}
+
+
+int configure_and_run(boost::property_tree::ptree &pt, po::variables_map &vm)
+{
     // Create survey object and load data
     survey *surv = new survey(pt);
     surv->load(vm["data"].as<std::string>());
 
     // Initialize lensing field
     field *f = new field(pt, surv);
-    
-    
+
+
     // Open output fits file before performing the actual reconstruction
     long naxes[3];
     naxes[0] = f->get_npix();
     naxes[1] = f->get_npix();
     naxes[2] = f->get_nlp();
     long naxis = naxes[2] == 1 ? 2 : 3; // Saving surface as 2d image, not 3d cube
-    
+
     std::auto_ptr<FITS> pFits(0);
     try
-    {                
+    {
         // overwrite existing file if the file already exists.
         std::stringstream fileName;
         fileName << "!" << vm["output"].as<std::string>();
@@ -195,9 +226,9 @@ int main(int argc, char *argv[])
     catch (FITS::CantCreate)
     {
         std::cerr << "ERROR: Cant create output FITS file" << std::endl;
-        return -1;       
+        return return_fitsio_err;
     }
-    
+
     // Array holding the reconstruction
     double *reconstruction = (double *) malloc(sizeof(double)* f->get_npix() * f->get_npix() * f->get_nlp());
 
@@ -205,7 +236,7 @@ int main(int argc, char *argv[])
     if (f->get_nlp() > 1) {
         density_reconstruction rec(pt, f);
         rec.reconstruct();
-        
+
         // Extracts the reconstructed array
         rec.get_density_map(reconstruction);
     } else {
@@ -217,41 +248,42 @@ int main(int argc, char *argv[])
         // Extracts the reconstructed array
         rec.get_convergence_map(reconstruction);
     }
-    
+
     // Number of elements in the array
     long nelements =  naxes[0] * naxes[1] * naxes[2];
     std::valarray<double> pixels(reconstruction, nelements);
     long  fpixel(1);
-    
+
     // Write primary array
     pFits->pHDU().write(fpixel,nelements,pixels);
 
-    
+
     std::vector<long> extAx(2, naxes[0]);
     string raName ("RA");
     ExtHDU* raExt = pFits->addImage(raName,DOUBLE_IMG,extAx);
-    
+
     string decName ("DEC");
     ExtHDU* decExt = pFits->addImage(decName,DOUBLE_IMG,extAx);
-    
-    
+
+
     double *  ra  = (double *) malloc(sizeof(double) * naxes[0] * naxes[0]);
     double *  dec = (double *) malloc(sizeof(double) * naxes[0] * naxes[0]);
-    
+
     f->get_pixel_coordinates(ra, dec);
-    
+
     long nExtElements = naxes[0] * naxes[0];
     std::valarray<double> raVals(ra, nExtElements);
     std::valarray<double> decVals(dec, nExtElements);
-    
+
     raExt->write(fpixel, nExtElements, raVals);
     decExt->write(fpixel, nExtElements, decVals);
-    
+
     free(reconstruction);
     free(ra);
     free(dec);
     delete f;
     delete surv;
 
-    return 0;
+    return return_ok;
+
 }
