@@ -76,5 +76,4 @@ script:
   - cmake -DBUILD_TESTING=ON ..
   - make VERBOSE=1
   - ./glimpse --version
-  - ./test_wavelet_transform
-  # - ./test_field
+  - make test
