@@ -149,7 +149,7 @@ int create_config(int argc, char *argv[], boost::property_tree::ptree &pt, po::v
         if(IDlist.size() > MAX_GPUS){
             cout << "ERROR: Requested more GPUs than maximum number;"<< endl;
             cout << "Maximum size of GPU array " << MAX_GPUS << endl;
-            return config_gpu_except;
+            return config_gpu_err;
         }
         if(IDlist.size() > nGpu){
             cout << "ERROR: Requested more GPUs than available;"<< endl;
