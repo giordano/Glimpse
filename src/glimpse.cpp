@@ -51,36 +51,6 @@
 using namespace std;
 using namespace CCfits;
 
-const int config_ok_go = 0;
-const int config_ok_halt = 1;
-const int config_exception = 2;
-const int config_gpu_err = 3;
-
-const int return_ok = 0;
-const int return_config_except = 1;
-const int return_gpu_err = -1;
-const int return_fitsio_err = -1;
-
-int main(int argc, char *argv[])
-{
-    boost::property_tree::ptree pt;
-    po::variables_map vm;
-
-    switch (create_config(argc, argv, pt, vm)) {
-        case config_ok_go:
-            break;
-        case config_ok_halt:
-            return return_ok;
-        case config_exception:
-            return return_config_except;
-        case config_gpu_err:
-            return return_gpu_err;
-    }
-
-    return configure_and_run(pt, vm);
-
-}
-
 int create_config(int argc, char *argv[], boost::property_tree::ptree &pt, po::variables_map &vm)
 {
     // List of GPU indices

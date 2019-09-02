@@ -1,5 +1,5 @@
-/* Copyright UCL, 2019
- * author Timothy Spain < t.spain@ucl.ac.uk >
+/*! Copyright UCL, 2019
+ * author : Tim Spain <t.spain@ucl.ac.uk>
  *
  * This software is a computer program whose purpose is to reconstruct mass maps
  * from weak gravitational lensing.
@@ -31,26 +31,27 @@
  * knowledge of the CeCILL license and that you accept its terms.
  *
  */
+#include "glimpse.h"
 
-#ifndef GLIMPSE_H
-#define GLIMPSE_H
+int main(int argc, char *argv[])
+{
+    boost::property_tree::ptree pt;
+    po::variables_map vm;
 
-#include <boost/program_options.hpp>
-#include <boost/property_tree/ptree.hpp>
+    switch (create_config(argc, argv, pt, vm)) {
+        case config_ok_go:
+            break;
+        case config_ok_halt:
+            return return_ok;
+        case config_exception:
+            return return_config_except;
+        case config_gpu_err:
+            return return_gpu_err;
+    }
 
-namespace po = boost::program_options;
+    return configure_and_run(pt, vm);
 
-const int config_ok_go = 0;
-const int config_ok_halt = 1;
-const int config_exception = 2;
-const int config_gpu_err = 3;
+}
 
-const int return_ok = 0;
-const int return_config_except = 1;
-const int return_gpu_err = -1;
-const int return_fitsio_err = -1;
 
-int create_config(int argc, char *argv[], boost::property_tree::ptree &pt, po::variables_map &vm);
-int configure_and_run(boost::property_tree::ptree &pt, po::variables_map &vm);
 
-#endif // ndef GLIMPSE_H
