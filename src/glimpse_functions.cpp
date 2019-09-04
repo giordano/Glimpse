@@ -1,5 +1,7 @@
 /*! Copyright CEA, 2015-2016
  * author : Francois Lanusse < francois.lanusse@gmail.com >
+ * Copyright UCL, 2019
+ * author : Tim Spain <t.spain@ucl.ac.uk>
  *
  * This software is a computer program whose purpose is to reconstruct mass maps
  * from weak gravitational lensing.
