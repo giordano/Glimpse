@@ -40,6 +40,16 @@
 
 namespace po = boost::program_options;
 
+const int config_ok_go = 0;
+const int config_ok_halt = 1;
+const int config_exception = 2;
+const int config_gpu_err = 3;
+
+const int return_ok = 0;
+const int return_config_except = 1;
+const int return_gpu_err = -1;
+const int return_fitsio_err = -1;
+
 int create_config(int argc, char *argv[], boost::property_tree::ptree &pt, po::variables_map &vm);
 int configure_and_run(boost::property_tree::ptree &pt, po::variables_map &vm);
 

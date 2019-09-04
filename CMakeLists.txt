@@ -76,7 +76,9 @@ link_directories(${SPARSE2D_LIBRARY_DIR}
 		    ${NFFT_LIBRARY_DIR}
 		    ${FFTW_LIBRARY_DIR})
 
-set(GLIMPSE_SRC src/survey.cpp
+set(GLIMPSE_SRC 
+		src/glimpse_functions.cpp
+		src/survey.cpp
 		src/redshift_distribution.cpp
 		src/field.cpp
 		src/surface_reconstruction.cpp
