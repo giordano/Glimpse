@@ -77,7 +77,7 @@ link_directories(${SPARSE2D_LIBRARY_DIR}
 		    ${FFTW_LIBRARY_DIR})
 
 set(GLIMPSE_SRC 
-		src/glimpse.cpp
+		src/glimpse_functions.cpp
 		src/survey.cpp
 		src/redshift_distribution.cpp
 		src/field.cpp
@@ -118,11 +118,11 @@ if(${CUDA_FOUND})
       set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -gencode arch=compute_${CAPABILITY},code=sm_${CAPABILITY}")
     endforeach()
 
-    cuda_add_executable(glimpse src/glimpse_main.cpp ${GLIMPSE_SRC} src/spg.cu src/spg.cpp)
+    cuda_add_executable(glimpse src/glimpse.cpp ${GLIMPSE_SRC} src/spg.cu src/spg.cpp)
     cuda_add_cufft_to_target(glimpse)
 else(${CUDA_FOUND})
     message("Compiling without CUDA acceleration")
-    add_executable(glimpse src/glimpse_main.cpp ${GLIMPSE_SRC})
+    add_executable(glimpse src/glimpse.cpp ${GLIMPSE_SRC})
 endif(${CUDA_FOUND})
 
 add_dependencies(glimpse NICAEA SPARSE2D)
