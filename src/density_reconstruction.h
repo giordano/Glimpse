@@ -49,6 +49,9 @@
 #include "gpu_utils.h"
 #endif
 
+#ifndef CAPTURE_OUTPUT
+#define CAPTURE_OUTPUT true
+#endif
 
 #include "wavelet_transform.h"
 
@@ -160,6 +163,9 @@ public:
      * 
      */
     void get_density_map(double *density);
+
+private:
+    void write_l1_weights(char* suffix);
     
 };
 
