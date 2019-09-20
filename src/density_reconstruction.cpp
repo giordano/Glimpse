@@ -559,9 +559,7 @@ void density_reconstruction::reconstruct()
     prox->update_weights(weights);
 #endif
 
-    if (CAPTURE_OUTPUT) {
-      write_l1_weights("updated");
-    }
+    write_l1_weights("updated");
 
     std::cout << "Running main iteration" << std::endl;
     run_main_iteration(nRecIter);
@@ -583,7 +581,7 @@ void density_reconstruction::reconstruct()
 void density_reconstruction::write_l1_weights(char *suffix)
 {
     std::ofstream wstream;
-    std::string wname = "w_";
+    std::string wname = "weights_";
     std::string extension = ".dat";
 
     wstream.write(reinterpret_cast<char *> (weights), sizeof(float) * nwavcoeff);
