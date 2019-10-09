@@ -144,11 +144,19 @@ if(BUILD_TESTING)
   find_package(Catch2 REQUIRED)
   enable_testing()
 
-  add_executable(test_wavelet_transform test/test_wavelet_transform.cpp
+  set(TEST_WAVELET_TRANSFORM_SRC
+    test/test_wavelet_transform.cpp
     src/wavelet_transform.cpp
-    src/starlet_2d.cpp)
+    src/starlet_2d.cpp
+    src/gpu_utils.c
+    )
+  if(${CUDA_FOUND})
+    cuda_add_executable(test_wavelet_transform ${TEST_WAVELET_TRANSFORM_SRC})
+    cuda_add_cufft_to_target(test_wavelet_transform)
+  else(${CUDA_FOUND})
+    add_executable(test_wavelet_transform ${TEST_WAVELET_TRANSFORM_SRC})
+  endif(${CUDA_FOUND})
   target_include_directories(test_wavelet_transform PRIVATE /usr/local/include)
-  target_compile_options(test_wavelet_transform PRIVATE -std=c++11)
   target_link_libraries(test_wavelet_transform ${SPARSE2D_LIBRARIES}
     ${FFTW_LIBRARIES}
     ${CCFITS_LIBRARY}
@@ -157,7 +165,8 @@ if(BUILD_TESTING)
 
   add_test( test_wavelet_transform_test test_wavelet_transform )
 
-  add_executable(test_field test/test_field.cpp
+  set(TEST_FIELD_SRC
+    test/test_field.cpp
     src/survey.cpp
     src/redshift_distribution.cpp
     src/field.cpp
@@ -165,7 +174,14 @@ if(BUILD_TESTING)
     # src/density_reconstruction.cpp
     src/starlet_2d.cpp
     src/wavelet_transform.cpp
+    src/gpu_utils.c
     )
+  if(${CUDA_FOUND})
+    cuda_add_executable(test_field ${TEST_FIELD_SRC})
+    cuda_add_cufft_to_target(test_field)
+  else(${CUDA_FOUND})
+    add_executable(test_field ${TEST_FIELD_SRC})
+  endif(${CUDA_FOUND})
   target_link_libraries(test_field ${NICAEA_LIBRARIES}
     ${SPARSE2D_LIBRARIES}
     ${Boost_LIBRARIES}
@@ -181,4 +197,4 @@ if(BUILD_TESTING)
 
   add_test( test_field_test test_field )
   set_tests_properties(test_field_test PROPERTIES WILL_FAIL TRUE)
-endif()
+endif(BUILD_TESTING)
